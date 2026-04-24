@@ -81,15 +81,5 @@ async def health():
     return {"status": "ok", "version": "1.0.0"}
 
 
-@app.post("/init-db", include_in_schema=False)
-async def init_db():
-    """One-time DB schema initializer. Remove after first use."""
-    import traceback
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        return {"status": "ok", "message": "All tables created"}
-    except Exception as exc:
-        return {"status": "error", "detail": str(exc), "traceback": traceback.format_exc()[-1000:]}
 
 
