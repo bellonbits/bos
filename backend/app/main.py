@@ -89,9 +89,21 @@ async def db_check():
     """Temporary diagnostic: test DB connectivity."""
     import traceback
     from sqlalchemy import text
+    from sqlalchemy.engine import make_url
+    url = make_url(settings.database_url)
+    conn_info = {
+        "driver": url.drivername,
+        "host": url.host,
+        "port": url.port,
+        "database": url.database,
+        "username": url.username,
+        "password_len": len(url.password or ""),
+        "password_first3": (url.password or "")[:3] + "***",
+    }
     try:
         async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-        return {"db": "ok"}
+            result = await conn.execute(text("SELECT version()"))
+            row = result.fetchone()
+        return {"db": "ok", "version": str(row[0])[:50], "conn_info": conn_info}
     except Exception as exc:
-        return {"db": "error", "detail": str(exc), "traceback": traceback.format_exc()}
+        return {"db": "error", "detail": str(exc), "conn_info": conn_info, "traceback": traceback.format_exc()[-500:]}
