@@ -36,8 +36,8 @@ app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     description="Offline-first SME Business OS API",
-    docs_url="/docs" if not _SERVERLESS else None,
-    redoc_url=None,
+    docs_url="/docs",
+    redoc_url="/redoc",
     lifespan=lifespan,
 )
 
