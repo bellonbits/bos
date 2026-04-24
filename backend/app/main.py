@@ -82,3 +82,16 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 @app.get("/health", include_in_schema=False)
 async def health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+@app.get("/db-check", include_in_schema=False)
+async def db_check():
+    """Temporary diagnostic: test DB connectivity."""
+    import traceback
+    from sqlalchemy import text
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"db": "ok"}
+    except Exception as exc:
+        return {"db": "error", "detail": str(exc), "traceback": traceback.format_exc()}
