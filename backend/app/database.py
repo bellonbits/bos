@@ -1,4 +1,5 @@
 import os
+import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
@@ -9,9 +10,14 @@ settings = get_settings()
 # Vercel / any serverless runtime — no persistent connection pool
 _SERVERLESS = os.getenv("APP_ENV") in ("production", "serverless") or os.getenv("VERCEL")
 
+# Supabase transaction pooler requires SSL
+_ssl_ctx = ssl.create_default_context()
+_connect_args = {"ssl": _ssl_ctx} if _SERVERLESS else {}
+
 engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
+    connect_args=_connect_args,
     **({"poolclass": NullPool} if _SERVERLESS else {
         "pool_size": settings.database_pool_size,
         "max_overflow": settings.database_max_overflow,
