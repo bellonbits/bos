@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Biashara OS",
+    "slug": "biashara-os",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F4C81"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "co.ke.biashara.os",
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F4C81"
+      },
+      "package": "co.ke.biashara.os",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECEIVE_BOOT_COMPLETED",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-background-fetch",
+        {
+          "ios": { "statusBarHidden": false }
+        }
+      ],
+      [
+        "expo-task-manager",
+        {}
+      ]
+    ],
+    "scheme": "biashara",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
