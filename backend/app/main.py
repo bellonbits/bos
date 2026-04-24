@@ -69,13 +69,10 @@ app.include_router(admin.router, prefix=API_PREFIX)
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    import traceback
-    tb = traceback.format_exc()
-    logger.error("unhandled_exception", path=request.url.path, error=str(exc), traceback=tb)
-    detail = str(exc) if settings.debug else "Internal server error"
+    logger.error("unhandled_exception", path=request.url.path, error=str(exc))
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": detail},
+        content={"detail": "Internal server error"},
     )
 
 
@@ -84,36 +81,3 @@ async def health():
     return {"status": "ok", "version": "1.0.0"}
 
 
-@app.get("/db-check", include_in_schema=False)
-async def db_check():
-    """Temporary diagnostic: test DB connectivity via raw asyncpg."""
-    import traceback, ssl, asyncpg
-    from sqlalchemy.engine import make_url
-    url = make_url(settings.database_url)
-
-    ssl_ctx = ssl.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl.CERT_NONE
-
-    conn_info = {
-        "host": url.host,
-        "port": url.port,
-        "database": url.database,
-        "username": url.username,
-        "password_first3": (url.password or "")[:3] + "***",
-    }
-    try:
-        conn = await asyncpg.connect(
-            host=url.host,
-            port=url.port or 6543,
-            user=url.username,
-            password=url.password,
-            database=url.database or "postgres",
-            ssl=ssl_ctx,
-        )
-        version = await conn.fetchval("SELECT version()")
-        await conn.close()
-        return {"db": "ok", "version": str(version)[:80], "conn_info": conn_info}
-    except Exception as exc:
-        return {"db": "error", "detail": str(exc), "type": type(exc).__name__,
-                "conn_info": conn_info, "traceback": traceback.format_exc()[-800:]}
