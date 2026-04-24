@@ -69,10 +69,13 @@ app.include_router(admin.router, prefix=API_PREFIX)
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
-    logger.error("unhandled_exception", path=request.url.path, error=str(exc))
+    import traceback
+    tb = traceback.format_exc()
+    logger.error("unhandled_exception", path=request.url.path, error=str(exc), traceback=tb)
+    detail = str(exc) if settings.debug else "Internal server error"
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal server error"},
+        content={"detail": detail},
     )
 
 

@@ -10,9 +10,11 @@ settings = get_settings()
 # Vercel / any serverless runtime — no persistent connection pool
 _SERVERLESS = os.getenv("APP_ENV") in ("production", "serverless") or os.getenv("VERCEL")
 
-# Supabase transaction pooler requires SSL
+# Supabase transaction pooler (PgBouncer) requirements:
+# 1. SSL must be enabled
+# 2. Prepared statement cache must be disabled (PgBouncer transaction mode doesn't support them)
 _ssl_ctx = ssl.create_default_context()
-_connect_args = {"ssl": _ssl_ctx} if _SERVERLESS else {}
+_connect_args = {"ssl": _ssl_ctx, "statement_cache_size": 0} if _SERVERLESS else {}
 
 engine = create_async_engine(
     settings.database_url,
